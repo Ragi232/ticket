@@ -1,16 +1,23 @@
 import json
 import os
 import uuid
+from dotenv import load_dotenv
+from ai_helper import get_ai_suggestion
+
+load_dotenv()
+
 
 def create_ticket():
     title = input("Enter ticket title: ").strip()
-    if title == "":
-        print("Title cannot be empty")
+
+    if not title:
+        print("Title cannot be empty.")
         return
 
     description = input("Enter ticket description: ").strip()
-    if description == "":
-        print("Description cannot be empty")
+
+    if not description:
+        print("Description cannot be empty.")
         return
 
     tickets = []
@@ -19,8 +26,13 @@ def create_ticket():
         try:
             with open("tickets.json", "r") as file:
                 tickets = json.load(file)
+
+            if not isinstance(tickets, list):
+                print("Error: tickets.json must contain a list.")
+                return
+
         except (json.JSONDecodeError, OSError):
-            print("Could not read tickets.json")
+            print("Could not read tickets.json.")
             return
 
     ticket = {
@@ -35,23 +47,37 @@ def create_ticket():
         with open("tickets.json", "w") as file:
             json.dump(tickets, file, indent=4)
 
-        print("Ticket created successfully!")
+        print("\nTicket created successfully!")
         print("Ticket ID:", ticket["id"])
 
     except OSError:
-        print("Could not save ticket")
+        print("Could not save ticket.")
+        return
+
+    print("\nGetting AI troubleshooting suggestions...")
+    suggestion = get_ai_suggestion(title, description)
+
+    print("\n===== AI SUGGESTION =====")
+    print(suggestion)
+    print("=========================")
 
 
-while True:
-    print("\n1. Create Ticket")
-    print("2. Exit")
+def main():
+    while True:
+        print("\n===== CAMPUSFLOW TICKET ASSISTANT =====")
+        print("1. Create Ticket")
+        print("2. Exit")
 
-    choice = input("Choose an option: ")
+        choice = input("Choose an option: ").strip()
 
-    if choice == "1":
-        create_ticket()
-    elif choice == "2":
-        print("Goodbye!")
-        break
-    else:
-        print("Invalid choice")
+        if choice == "1":
+            create_ticket()
+        elif choice == "2":
+            print("Goodbye!")
+            break
+        else:
+            print("Invalid choice.")
+
+
+if __name__ == "__main__":
+    main()
